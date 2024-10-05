@@ -66,15 +66,15 @@ const userService = {
             }
         }
     },
-    async verify(data) {
+    async verify(userId, otpCode) {
         try {
-            if (isStringEmptyOrWhitespace(data.id)) {
+            if (isStringEmptyOrWhitespace(userId)) {
                 return {
                     isSuccess: false,
                     message: "No ID found",
                 }
             }
-            else if (data.code == undefined || data.code == null) {
+            else if (otpCode == undefined || otpCode == null) {
                 return {
                     isSuccess: false,
                     message: "No Verification Code found",
@@ -82,22 +82,30 @@ const userService = {
             }
 
             //const user = await User.findById(data.id)
-            const objectId = ObjectId.createFromHexString(data.id);
-            const user = await User.findOne({_id: objectId, verificationCode: data.code })
+            const objectId = ObjectId.createFromHexString(userId);
+            const user = await User.findOne({_id: objectId, verificationCode: otpCode })
             if (user) {
-                await User.findByIdAndUpdate(data.id, { isVerified: true })
-                const tokenResult = await TokenService.signAccessToken(user._id.toHexString())
-                if (tokenResult.isSuccess) {
-                    return {
-                        isSuccess: true,
-                        message: "Verification success",
-                        data: {
-                            token: tokenResult.data.token,
-                        }
+                await User.findByIdAndUpdate(userId, { isVerified: true })
+                // const tokenResult = await TokenService.signAccessToken(user._id.toHexString())
+                // if (tokenResult.isSuccess) {
+                //     return {
+                //         isSuccess: true,
+                //         message: "Verification success",
+                //         data: {
+                //             token: tokenResult.data.token,
+                //         }
+                //     }
+                // }
+                // else {
+                //     return tokenResult
+                // }
+                const token = await TokenService.generateToken(user._id.toHexString())
+                return {
+                    isSuccess: true,
+                    message: "Verification success",
+                    data: {
+                        token: token,
                     }
-                }
-                else {
-                    return tokenResult
                 }
             }
             else {
@@ -140,17 +148,26 @@ const userService = {
                         }
                     }
 
-                    const tokenResult = await TokenService.signAccessToken(user._id.toHexString())
-                    if (tokenResult.isSuccess) {
-                        return {
-                            isSuccess: true,
-                            message: "Login success",
-                            data: {
-                                token: tokenResult.data.token,
-                            }
+                    // const tokenResult = await TokenService.signAccessToken(user._id.toHexString())
+                    // if (tokenResult.isSuccess) {
+                    //     return {
+                    //         isSuccess: true,
+                    //         message: "Login success",
+                    //         data: {
+                    //             token: tokenResult.data.token,
+                    //         }
+                    //     }
+                    // }
+                    // return tokenResult
+
+                    const token = await TokenService.generateToken(user._id.toHexString())
+                    return {
+                        isSuccess: true,
+                        message: "Login success",
+                        data: {
+                            token: token,
                         }
                     }
-                    return tokenResult
                 }
             }
             return {

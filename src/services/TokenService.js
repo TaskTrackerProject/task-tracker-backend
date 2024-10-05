@@ -1,6 +1,10 @@
 const JWT = require("jsonwebtoken")
 
 const tokenService = {
+    generateToken(userId) {
+        const secret = process.env.ACCESS_TOKEN_SECRET
+        return JWT.sign({userId}, secret)
+    },
     signAccessToken(userId) {
         return new Promise((resolve, reject) => {
             try {
