@@ -128,10 +128,15 @@ const userService = {
             if (user) {
                 const isPasswordMatch = comparePassword(password, user.password)
                 if (isPasswordMatch) {
+                    const userId = user._id.toHexString()
                     if (!user.isVerified) {
                         return {
                             isSuccess: false,
                             message: "User not verified",
+                            data: {
+                                id : userId,
+                                email : user.email,
+                            },
                             error: {code: "not_verified", detail: "User not verified"}
                         }
                     }
@@ -148,11 +153,12 @@ const userService = {
                     // }
                     // return tokenResult
 
-                    const token = await TokenService.generateToken(user._id.toHexString())
+                    const token = await TokenService.generateToken(userId)
                     return {
                         isSuccess: true,
                         message: "Login success",
                         data: {
+                            id: userId,
                             token: token,
                         }
                     }
@@ -178,19 +184,25 @@ const userService = {
             if (user) {
                 const isPasswordMatch = comparePassword(password, user.password)
                 if (isPasswordMatch) {
+                    const userId = user._id.toHexString()
                     if (!user.isVerified) {
                         return {
                             isSuccess: false,
                             message: "User not verified",
+                            data: {
+                                id : userId,
+                                email : user.email,
+                            },
                             error: {code: "not_verified", detail: "User not verified"}
                         }
                     }
-
-                    const token = await TokenService.generateToken(user._id.toHexString())
+                    
+                    const token = await TokenService.generateToken(userId)
                     return {
                         isSuccess: true,
                         message: "Login success",
                         data: {
+                            id: userId,
                             token: token,
                         }
                     }

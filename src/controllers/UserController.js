@@ -54,6 +54,13 @@ const login = async (req, res) => {
                 message: "Login success",
                 data: result.data,
             })
+        } else if (result.data) {
+            res.status(400).send({
+                status: "error",
+                data: result.data,
+                message: result.message,
+                errors: [result.error],
+            })
         } else {
             res.status(400).send({
                 status: "error",
@@ -68,6 +75,13 @@ const login = async (req, res) => {
                 status: "success",
                 message: "Login success",
                 data: result.data,
+            })
+        } else if (result.data) {
+            res.status(400).send({
+                status: "error",
+                data: result.data,
+                message: result.message,
+                errors: [result.error],
             })
         } else {
             res.status(400).send({
