@@ -122,21 +122,8 @@ const userService = {
             }
         }
     },
-    async login(username, password) {
+    async loginViaUsername(username, password) {
         try {
-            if (isStringEmptyOrWhitespace(username)) {
-                return {
-                    isSuccess: false,
-                    message: "Username not found",
-                }
-            }
-            else if (isStringEmptyOrWhitespace(password)) {
-                return {
-                    isSuccess: false,
-                    message: "Password not found",
-                }
-            }
-
             const user = await User.findOne({ username: username });
             if (user) {
                 const isPasswordMatch = comparePassword(password, user.password)
@@ -144,7 +131,8 @@ const userService = {
                     if (!user.isVerified) {
                         return {
                             isSuccess: false,
-                            message: "User not verified"
+                            message: "User not verified",
+                            error: {code: "not_verified", detail: "User not verified"}
                         }
                     }
 
@@ -172,13 +160,53 @@ const userService = {
             }
             return {
                 isSuccess: false,
-                message: "Login failed"
+                message: "Login failed",
+                error: {code: "login_failed", detail: "Login failed"},
             }
 
         } catch (err) {
             return {
                 isSuccess: false,
                 message: err.message,
+                error: {code: "login_failed", detail: err.message},
+            }
+        }
+    },
+    async loginViaEmail(email, password) {
+        try {
+            const user = await User.findOne({ email: email });
+            if (user) {
+                const isPasswordMatch = comparePassword(password, user.password)
+                if (isPasswordMatch) {
+                    if (!user.isVerified) {
+                        return {
+                            isSuccess: false,
+                            message: "User not verified",
+                            error: {code: "not_verified", detail: "User not verified"}
+                        }
+                    }
+
+                    const token = await TokenService.generateToken(user._id.toHexString())
+                    return {
+                        isSuccess: true,
+                        message: "Login success",
+                        data: {
+                            token: token,
+                        }
+                    }
+                }
+            }
+            return {
+                isSuccess: false,
+                message: "Login failed",
+                error: {code: "login_failed", detail: "Login failed"},
+            }
+
+        } catch (err) {
+            return {
+                isSuccess: false,
+                message: err.message,
+                error: {code: "login_failed", detail: err.message},
             }
         }
     },

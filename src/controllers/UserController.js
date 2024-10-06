@@ -1,4 +1,5 @@
 const UserService = require("../services/UserService")
+const TokenService = require("../services/TokenService")
 
 const register = async (req, res) => {
     const result = await UserService.register(req.body)
@@ -41,7 +42,57 @@ const verify = async (req, res) => {
 }
 
 const login = async (req, res) => {
+    const email = req.body.email
+    const username = req.body.username
+    const password = req.body.password
 
+    if (email && password) {
+        const result = await UserService.loginViaEmail(email, password)
+        if (result.isSuccess) {
+            res.status(200).send({
+                status: "success",
+                message: "Login success",
+                data: result.data,
+            })
+        } else {
+            res.status(400).send({
+                status: "error",
+                message: result.message,
+                errors: [result.error],
+            })
+        }
+    } else if (username && password) {
+        const result = await UserService.loginViaUsername(username, password)
+        if (result.isSuccess) {
+            return res.status(200).send({
+                status: "success",
+                message: "Login success",
+                data: result.data,
+            })
+        } else {
+            res.status(400).send({
+                status: "error",
+                message: result.message,
+                errors: [result.error],
+            })
+        }
+    } else {
+        res.status(400).send({
+            status: "error",
+            message: "Something went wrong",
+            errors: [{
+                code: "missing_parameter",
+                detail: "Missing required parameter",
+            }]
+        })
+    }
+}
+
+function isStringEmptyOrWhitespace(str) {
+    if (str === undefined) {
+        return true;
+    }
+    return !str || str.trim().length === 0;
 }
 
 module.exports = {
